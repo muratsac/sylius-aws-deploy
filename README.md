@@ -8,18 +8,28 @@ Nginx
 
 ## .ebextensions
 
-### 1-yarn.config
+### 1-packages.config
 
 ```yaml
+packages:
+  yum:
+    gcc: []
+    make: []
+    htop: []
+    php-mbstring: []
+    php-gd: []
+    php-pdo: []
+    php-pear: []
+    php-devel: []
+    php-pecl-apcu: []
+
 commands:
   01_install_node:
     command: |
-      sudo curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -
+      sudo curl --silent --location https://rpm.nodesource.com/setup_13.x | sudo bash -
       sudo yum -y install nodejs
 
   02_install_yarn:
-    # don't run the command if yarn is already installed (file /usr/bin/yarn exists)
-    test: '[ ! -f /usr/bin/yarn ] && echo "Yarn not found, installing..."'
     command: |
       sudo wget https://dl.yarnpkg.com/rpm/yarn.repo -O /etc/yum.repos.d/yarn.repo
       sudo yum -y install yarn
@@ -28,9 +38,20 @@ commands:
 ### 2-composer.config
 
 ```yaml
+commands:
+  01_update_composer:
+    command: export COMPOSER_HOME=/root && /usr/bin/composer.phar self-update
+
 option_settings:
-  aws:elasticbeanstalk:container:php:phpini:
-    document_root: /public
+  - namespace: aws:elasticbeanstalk:application:environment
+    option_name: COMPOSER_HOME
+    value: /root
+  - namespace: aws:elasticbeanstalk:container:php:phpini
+    option_name: document_root
+    value: /public
+  - namespace: aws:elasticbeanstalk:container:php:phpini
+    option_name: composer_options
+    value: --optimize-autoloader --ignore-platform-reqs --no-ansi --no-interaction --no-progress --no-suggest
 ```
 
 ### 3-app.config
@@ -38,18 +59,20 @@ option_settings:
 ```yaml
 container_commands:
   1_writable_directories:
-    command: sudo chmod -R 777 /var/app/current/var && chmod -R 777 /var/app/current/public
+    command: sudo chmod -R 777 /var/app/staging/var && chmod -R 777 /var/app/staging/public
   2_dugun_db_migration:
-    command: php bin/console doctrine:migrations:migrate --no-interaction
+    command: cd /var/app/staging && php bin/console doctrine:migrations:migrate --no-interaction
   3_doctrine_cache_clear:
-    command: php bin/console doctrine:cache:clear-metadata && sudo php bin/console doctrine:cache:clear-query
-  4_nginx_reload:
+    command: cd /var/app/staging &&  php bin/console doctrine:cache:clear-metadata && sudo php bin/console doctrine:cache:clear-query
+  4_install_assets:
+    command: cd /var/app/staging &&  php bin/console sylius:install:assets --no-interaction
+  5_nginx_reload:
      command: sudo systemctl restart nginx
-  5_yarn_install:
-     command: yarn install
-  6_yarn_build:
-     command: yarn build
-  7_cache_warmup:
+  6_yarn_dependency:
+     command: cd /var/app/staging && yarn install
+  7_yarn_frontend:
+     command: cd /var/app/staging && yarn build
+  8_cache_warmup:
     command: HTTPDUSER=$(ps axo user,comm | grep -E '[a]pache|[h]ttpd|[_]www|[w]ww-data|[n]ginx|webapp' | grep -v root | head -1 | cut -d\  -f1) && sudo setfacl -dR -m u:"$HTTPDUSER":rwX -m u:$(whoami):rwX var && sudo setfacl -R -m u:"$HTTPDUSER":rwX -m u:$(whoami):rwX var
 ```
 
