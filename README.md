@@ -1,4 +1,15 @@
-# Sylius deploy on AWS Elastic Beanstalk
+<p align="center">
+    <a href="https://sylius.com" target="_blank">
+        <img src="https://demo.sylius.com/assets/shop/img/logo.png" />
+    </a>
+</p>
+<p align="center">
+    <a href="https://aws.amazon.com/tr/elasticbeanstalk/" target="_blank">
+        <img src="https://avatars0.githubusercontent.com/u/2232217?s=200&v=4" />
+    </a>
+</p>
+
+<h1 align="center">Sylius Deploy on AWS Elastic Beanstalk</h1>
 
 ### Platform
 PHP 7.3 running on 64bit Amazon Linux 2
