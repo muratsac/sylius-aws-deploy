@@ -1,11 +1,11 @@
 <p align="center">
     <a href="https://sylius.com" target="_blank">
-        <img height="100" src="https://demo.sylius.com/assets/shop/img/logo.png" />
+        <img height="75" src="https://demo.sylius.com/assets/shop/img/logo.png" />
     </a>
 </p>
 <p align="center">
     <a href="https://aws.amazon.com/tr/elasticbeanstalk/" target="_blank">
-        <img height="100" src="https://avatars0.githubusercontent.com/u/2232217?s=200&v=4" />
+        <img height="75" src="https://avatars0.githubusercontent.com/u/2232217?s=200&v=4" />
     </a>
 </p>
 
